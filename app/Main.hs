@@ -189,7 +189,7 @@ updateImpl config@PackageConfig{ depends } = do
 
 getPureScriptVersion :: IO Version
 getPureScriptVersion = do
-  let pursProc = inproc "purs" [ "--version" ] empty
+  let pursProc = inproc "node" ["node_modules\\purescript\\bin\\purs.js" , "--version" ] empty
   outputLines <- Turtle.fold (fmap lineToText pursProc) Foldl.list
   case outputLines of
     [onlyLine]
@@ -428,7 +428,7 @@ verifyPackageSet = do
     echoT ("Verifying package " <> runPackageName name)
     dependencies <- map fst <$> getTransitiveDeps db [name]
     let srcGlobs = map (pathToTextUnsafe . (</> ("src" </> "**" </> "*.purs")) . dirFor) dependencies
-    procs "purs" ("compile" : srcGlobs) empty
+    procs "node" ("node_modules\\purescript\\bin\\purs.js" : "compile" : srcGlobs) empty
 
 main :: IO ()
 main = do
@@ -468,13 +468,13 @@ main = do
             (Opts.info (install <$> pkg Opts.<**> Opts.helper)
             (Opts.progDesc "Install the named package"))
         , Opts.command "build"
-            (Opts.info (exec ["purs", "compile"]
+            (Opts.info (exec ["node", "node_modules\\purescript\\bin\\purs.js" , "compile"]
                         <$> onlyDeps "Compile only the package's dependencies"
                         <*> passthroughArgs "purs compile"
                         Opts.<**> Opts.helper)
             (Opts.progDesc "Build the current package and dependencies"))
         , Opts.command "repl"
-            (Opts.info (exec ["purs", "repl"]
+            (Opts.info (exec ["node", "node_modules\\purescript\\bin\\purs.js", "repl"]
                         <$> onlyDeps "Load only the package's dependencies"
                         <*> passthroughArgs "purs repl"
                         Opts.<**> Opts.helper)
